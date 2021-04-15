@@ -1,0 +1,47 @@
+Map<String, String> cdMap = new Map<String, String>();
+cdMap.put('1','0695g000000otgeAAA');
+cdMap.put('2','0695g000000otgeAAA');
+System.debug(cdMap.keySet());
+System.debug(cdMap.values());
+
+List<ContentVersion> cvList = [
+    							SELECT	Id
+    									,Title
+                                       	,VersionData
+                                       	,FileExtension
+    									,ContentDocumentID
+								FROM	ContentVersion
+                               	WHERE	ContentDocumentID IN :cdMap.values()
+                                      ];
+List<String, ContentVersion> cvMap = new List<String, ContentVersion>();
+
+for(ContentVersion cv : cvList){
+    cvMap.put(cv.ContentDocumentID, cv);
+}
+
+List<PDFfileMerge.ReqPDFJson> listFiles = new List<PDFfileMerge.ReqPDFJson>();
+
+for(String seq : cdMap.keySet()){
+    ContentVersion cv = cvMap.get(cdMap.get(seq));
+    PDFfileMerge.ReqPDFJson	pdfJson = new PDFfileMerge.ReqPDFJson();
+    pdfJson.Title = cv.Title; 					// Title
+    pdfJson.VersionData = cv.VersionData; 		// VersionData
+    pdfJson.FileExtension = cv.FileExtension; 	// FileExtension
+    pdfJson.ContentDocumentId = cv.Id; 			// ContentVersion Id
+    pdfJson.Seq = seq; 							// 순서
+    listFiles.add(pdfJson);
+}
+
+System.debug(listFiles);
+
+https://lgchem1--test.lightning.force.com/apex/LG_ABSInfoPropertyResultKOR?
+selectedPrp=a0e1s000000BF2fAAG
+,a0e1s000000BF2gAAG
+,a0e1s000000BF2hAAG
+,&
+selectedGrd=[{"label":"MR380B5","name":"a0D1s0000023fh7EAA"}]&selectedStd=ASTM&selectedLang=ko
+https://kalsales--c.visualforce.com/apex/WordCloudDetail?RHQ_Code=*&sDate=2021-03-15&text=&Ob_Code=CA&report_type=ALL&eDate=2021-04-15
+https://dkbmc36-dev-ed.visualforce.com/apex/pdf?selected="123"
+[{'1',"0695g000000otgeAAA"},{"2","0695g000000otgeAAA"}]
+
+/Users/deokjunekim/sheltered-mesa-66267
