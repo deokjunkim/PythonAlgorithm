@@ -24,7 +24,10 @@ def find_fibonacci_seq_rec(n):
 
 def find_fibonacci_seq_form(n):
     sq5 = math.sqrt(5)
+    print(sq5)
     phi = (1+sq5) /2
+    print(phi, 1+sq5)
+    print(phi ** n, sq5)
     return int(math.floor(phi ** n / sq5))
 
 if __name__ == "__main__":

@@ -10,18 +10,6 @@
 # 2.
 #def two_Binary():
 
-num = 1001
-base = 2
-print(num % 10)
-print(int(num / 10))
-result, multiple = 0,1
-while num > 0:
-    n = num % 10
-    value = n * multiple
-    multiple *= base
-    num = int(num / 10)
-    result += value
-    print(n, int(multiple/2), result)
-
-print(result)
-
+s ='11'
+d = int(s)
+print(d)
