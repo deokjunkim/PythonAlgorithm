@@ -26,9 +26,11 @@ myObject = "다른 어떤 객체"
 
 newObject = copy.copy(myObject) # 얕은 복사
 newObject2 = copy.deepcopy(myObject) # 깊은 복사
-myObject = myObject[-1:]
+myObject = "" #myObject[-1:]
 print(newObject)
 print(newObject2)
+print(myObject)
+
 
 
 

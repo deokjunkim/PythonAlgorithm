@@ -33,37 +33,72 @@ progresses	speeds	return
 import math
 def solution(progresses, speeds):
     answer = []
-    pList = []
     maxday = 0
+
     for i in range(len(progresses)):
+        # print((100 - progresses[i]) // speeds[i])
+        # print((progresses[i] - 100) // speeds[i])
         today = math.ceil((100 - progresses[i]) / speeds[i])
-        if maxday > today:
-
+        # print(today)
+        if maxday >= today:
+            answer[-1] += 1
         else:
-            maxday = math.ceil((100 - progresses[i]) / speeds[i])
+            maxday = today
             answer.append(1)
-
-
-
-    y = 0
-    today = 0
-    for i in range(len(pList)):
-        if i-1 >= 0:
-            day = math.ceil(pList[i] / speeds[i])
-
-            if today >= day:
-                if answer[y] != None:
-                    answer[y] += 1
-                else:
-                    answer.append(1)
-            else:
-                y += 1
-                answer.append(1)
-        else:
-            today = math.ceil(pList[i] / speeds[i])
-            answer.append (1)
+    # print(answer)
 
     return answer
 
-solution([93, 30, 55],[1, 30, 5])
-solution([95, 90, 99, 99, 80, 99],[1, 1, 1, 1, 1, 1])
+
+# zip을 이용한 풀이
+# def solution(progresses, speeds):
+#     # print(zip(progresses, speeds))
+#     Q=[]
+#     for p, s in zip(progresses, speeds):
+#         print(p, s)
+#         print(len(Q)==0)
+#         # print(Q[-1][0]<-((p-100)//s))
+#         print((p-100)//s)
+#         if len(Q)==0 or Q[-1][0] < -((p-100)//s):
+#             Q.append([-((p-100)//s),1])
+#             print(Q)
+#         else:
+#             Q[-1][1]+=1
+#     print()
+#     return [q[1] for q in Q]
+
+# def solution(progresses, speeds):
+#     print(progresses)
+#     print(speeds)
+#     answer = []
+#     time = 0
+#     count = 0
+#     while len(progresses)> 0:
+#         print(progresses[0], time, speeds[0])
+#         if (progresses[0] + time*speeds[0]) >= 100:
+#             progresses.pop(0)
+#             speeds.pop(0)
+#             count += 1
+#             print(progresses, speeds, count)
+#         else:
+#             if count > 0:
+#                 answer.append(count)
+#                 count = 0
+#             time += 1
+#             # print(progresses, speeds, count)
+#         print()
+#     answer.append(count)
+#     return answer
+
+solution([99, 99, 99, 99, 99],[99, 99, 99, 99, 99])#[5]
+
+solution([20, 99, 93, 30, 55, 10],[5, 10, 1, 1, 30, 5])#[3, 3]
+
+solution([1, 99],[99, 1])#[2]
+
+
+# solution([93, 30, 55],[1, 30, 5])
+# solution([95, 90, 99, 99, 80, 99],[1, 1, 1, 1, 1, 1])
+# 5 10 1 1 10 1
+# 1 3 2
+# 5 10 1 1 20 1

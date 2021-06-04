@@ -1,47 +1,379 @@
-Map<String, String> cdMap = new Map<String, String>();
-cdMap.put('1','0695g000000otgeAAA');
-cdMap.put('2','0695g000000otgeAAA');
-System.debug(cdMap.keySet());
-System.debug(cdMap.values());
+# from simple_salesforce import Salesforce
+from simple_salesforce import Salesforce, format_soql
+import os
+import json
+import requests
 
-List<ContentVersion> cvList = [
-    							SELECT	Id
-    									,Title
-                                       	,VersionData
-                                       	,FileExtension
-    									,ContentDocumentID
-								FROM	ContentVersion
-                               	WHERE	ContentDocumentID IN :cdMap.values()
-                                      ];
-List<String, ContentVersion> cvMap = new List<String, ContentVersion>();
+global industry_list
+def salesforceCon():
+    sf = Salesforce(username='deokjun.kim@lgcpartner.com.test', password='ejrwns48', security_token="", domain="test")
+    print("session Id : " + sf.session_id)
+    return sf
 
-for(ContentVersion cv : cvList){
-    cvMap.put(cv.ContentDocumentID, cv);
-}
+def getHierarchy(sf):
+    response = sf.query("SELECT Industry__r.Name, Detail_Industry__r.Name, Application__c, Application__r.Name, Id, Name FROM LG_Part__c")
+    print(response)
+    print(response["records"])
 
-List<PDFfileMerge.ReqPDFJson> listFiles = new List<PDFfileMerge.ReqPDFJson>();
+    industry = {}
+    for record in response["records"]:
 
-for(String seq : cdMap.keySet()){
-    ContentVersion cv = cvMap.get(cdMap.get(seq));
-    PDFfileMerge.ReqPDFJson	pdfJson = new PDFfileMerge.ReqPDFJson();
-    pdfJson.Title = cv.Title; 					// Title
-    pdfJson.VersionData = cv.VersionData; 		// VersionData
-    pdfJson.FileExtension = cv.FileExtension; 	// FileExtension
-    pdfJson.ContentDocumentId = cv.Id; 			// ContentVersion Id
-    pdfJson.Seq = seq; 							// 순서
-    listFiles.add(pdfJson);
-}
+        Industry_Name = record["Industry__r"]["Name"]
+        Detail_Industry_Name = record["Detail_Industry__r"]["Name"]
+        Application = record["Application__c"]
+        Application_Name = record["Application__r"]["Name"]
+        Part = record["Id"]
+        Part_Name = record["Name"]
 
-System.debug(listFiles);
+        if industry.get(Industry_Name) == None:
+            industry[Industry_Name] = {
+                Detail_Industry_Name: {
+                    Application_Name: {
+                        "Id": Application,
+                        Part_Name: {
+                            "Id": Part
+                        }
+                    }
+                }
+            }
 
-https://lgchem1--test.lightning.force.com/apex/LG_ABSInfoPropertyResultKOR?
-selectedPrp=a0e1s000000BF2fAAG
-,a0e1s000000BF2gAAG
-,a0e1s000000BF2hAAG
-,&
-selectedGrd=[{"label":"MR380B5","name":"a0D1s0000023fh7EAA"}]&selectedStd=ASTM&selectedLang=ko
-https://kalsales--c.visualforce.com/apex/WordCloudDetail?RHQ_Code=*&sDate=2021-03-15&text=&Ob_Code=CA&report_type=ALL&eDate=2021-04-15
-https://dkbmc36-dev-ed.visualforce.com/apex/pdf?selected="123"
-[{'1',"0695g000000otgeAAA"},{"2","0695g000000otgeAAA"}]
+        elif industry.get(Industry_Name).get(Detail_Industry_Name) == None:
+            industry[Industry_Name][Detail_Industry_Name] = {
+                Application_Name: {
+                    "Id": Application,
+                    Part_Name: {
+                        "Id": Part
+                    }
+                }
+            }
+        elif industry.get(Industry_Name).get(Detail_Industry_Name).get(Application_Name) == None:
+            industry[Industry_Name][Detail_Industry_Name][Application_Name] = {
+                "Id": Application,
+                Part_Name: {
+                    "Id": Part
+                }
+            }
+        elif industry.get(Industry_Name).get(Detail_Industry_Name).get(Application_Name).get(Part_Name) == None:
+            industry[Industry_Name][Detail_Industry_Name][Application_Name][Part_Name] = {"Id":Part}
 
-/Users/deokjunekim/sheltered-mesa-66267
+    return industry
+
+def upload3(sf, hierarchy):
+    # data = [{
+    #     'LinkedEntityId': 'a0H1s000003kaHCEAY',
+    #     'ContentDocumentId': '0691s000000kDaiAAE',
+    # }]
+    # sf.bulk.Contact.insert(data,batch_size=10000,use_serial=True)
+    sf.Contact.insert({
+        'LinkedEntityId': 'a0H1s000003kaHCEAY',
+        'ContentDocumentId': '0691s000000kCZ6AAM',
+    })
+    # data = [
+    #     {'ContentDocumentId': '0691s000000kCZ6AAM', 'LinkedEntityId': 'a0H1s000003kaHCEAY'}
+    # ]
+    #
+    # sf.bulk.Contact.insert(data, batch_size=10000, use_serial=True)
+
+def upload2(sf, hierarchy):
+    response = sf.query(
+        format_soql("SELECT Id,ContentDocumentId,Title from ContentVersion WHERE OwnerID = {}", "0051s000001DWDpAAO"))
+    # data = []
+    count = 0
+    for record in response["records"]:
+        industry = record["Title"].split('_')[1]
+        dindustry = record["Title"].split('_')[2]
+        applicaiotn = record["Title"].split('_')[3]
+        part = record["Title"].split('_')[4]
+        data = {
+            'LinkedEntityId': hierarchy[industry][dindustry][applicaiotn][part]["Id"],
+            'ContentDocumentId': record["ContentDocumentId"],
+        }
+        print(hierarchy[industry][dindustry][applicaiotn][part]["Id"],record["ContentDocumentId"])
+        # print('ContentDocumentLink dl' + str(count) +'= new ContentDocumentLink();')
+        # print('dl'+str(count)+'.LinkedEntityId = \''+ hierarchy[industry][dindustry][applicaiotn][part]["Id"]+'\';')
+        # print('dl'+str(count)+'.ContentDocumentId = \'' + record["ContentDocumentId"]+'\';')
+        # print('dlList.add(dl'+str(count)+');')
+        # count +=1
+        # sf.bulk.ContentDocumentLink.insert(data, batch_size=1000)
+        # print(data)
+    # ContentDocumentLink
+    # dl = new
+    # ContentDocumentLink();
+    # dl.LinkedEntityId = 'a0H1s000003kaHCEAY';
+    # dl.ContentDocumentId = '0691s000000kCZ6AAM';
+    # dlList.add(dl);
+
+
+    # for d in data:
+    #     print(d)
+
+def uploade(sf,cvidList,ContentVersion):
+    print('=== bulk uploade ===')
+    data = []
+    response = sf.query(
+        format_soql("SELECT Id, ContentDocumentId from ContentVersion WHERE Id IN {idList}", idList=cvidList))
+
+    for record in response["records"]:
+        data.append({
+            'LinkedEntityId': ContentVersion[record["Id"]],
+            'ContentDocumentId': record["ContentDocumentId"],
+            'Visibility':'AllUsers'
+        }
+        )
+    print(data)
+    sf.bulk.ContentDocumentLink.insert(data, batch_size=10, use_serial=True)
+
+def searchDirectory(hierarchy):
+    # PNG
+    folderName = '0521_업종_어플리케이션_네이밍'
+    path_dir = '/Users/deokjunekim/Downloads/' + folderName
+
+    forder_list = os.listdir(path_dir)
+    # 기본 폴더
+    # upload 구조
+    """
+    {
+        Name,
+        Id,
+        Path   
+    }
+    """
+    linkMap ={}
+    uploadFileList = []
+    # for forder in forder_list:
+    #     if forder != ".DS_Store":
+    #         print('Forder : ' + forder)
+    #
+    #         id_forder_list = os.listdir(path_dir + '/' + forder)
+    #         # Industry 폴더
+    #         for id_forder in id_forder_list:
+    #             if id_forder != ".DS_Store":
+    #                 print(' Industry : ' + id_forder)
+    #                 # industry = id_forder.split('_')[1]
+    #                 ap_forder_list = os.listdir(path_dir + '/' + forder + '/' + id_forder)
+    #
+    #                 # Application 폴더
+    #                 for ap_forder in ap_forder_list:
+    #                     if ap_forder != ".DS_Store":
+    #                         print('      Sub-Industry: ' + ap_forder)
+    #                         # dindustry = ap_forder.split('_')[1]
+    #                         pt_forder_list = os.listdir(path_dir + '/' + forder + '/' + id_forder + '/' + ap_forder)
+    #
+    #                         # Part 폴더
+    #                         for pt_forder in pt_forder_list:
+    #                             if pt_forder != ".DS_Store":
+    #                                 print('         Application : ' + pt_forder)
+    #                                 # applicaiotn = pt_forder.split('_')[1]
+    #                                 file_list = os.listdir(path_dir + '/' + forder + '/' + id_forder + '/' + ap_forder + '/' + pt_forder)
+    #                                 print('         ' + str(file_list))
+    #                                 # File 폴더
+    #                                 for file in file_list:
+    #                                     if file != ".DS_Store":
+    #                                         industry = file.split('_')[1]
+    #                                         dindustry = file.split('_')[2]
+    #                                         applicaiotn = file.split('_')[3]
+    #                                         part = file.split('_')[4]
+    #                                         print('         '+path_dir + '/' + forder + '/' + id_forder + '/' + ap_forder + '/' + pt_forder + '/' + file )
+    #
+    #                                         uploadFileList.append({
+    #                                             "Title" : file,
+    #                                             "PathOnClient" : path_dir + '/' + forder + '/' + id_forder + '/' + ap_forder + '/' + pt_forder + '/' + file,
+    #                                             # "Id" : hierarchy[industry][dindustry][applicaiotn][part]["Id"]
+    #                                         })
+    #                                         linkMap[file] = hierarchy[industry][dindustry][applicaiotn][part]["Id"]
+    #                                         print(hierarchy[industry][dindustry][applicaiotn][part]["Id"])
+
+
+    file_list = os.listdir(path_dir)
+    for file in file_list:
+        if file != ".DS_Store":
+            print('         ' + path_dir + '/' + file)
+            file = file.split('.')[0]
+
+            industry = file.split('_')[1]
+            dindustry = file.split('_')[2]
+            applicaiotn = file.split('_')[3]
+            part = file.split('_')[4]
+
+            uploadFileList.append({
+                "Title" : file,
+                "PathOnClient" : file + '.png',
+                # "Id" : hierarchy[industry][dindustry][applicaiotn][part]["Id"]
+            })
+            if file.split('_')[-1] != 'AppEmpty':
+                linkMap[file] = hierarchy[industry][dindustry][applicaiotn][part]["Id"]
+                print(hierarchy[industry][dindustry][applicaiotn][part]["Id"])
+            # else:
+            #     linkMap[file]
+                # print(industry, dindustry, applicaiotn, part)
+                # print('         ' + path_dir + '/' + file)
+                # print('empty', file)
+                # print(hierarchy[industry][dindustry][applicaiotn]["Id"])
+
+
+    # print(uploadFileList[0])
+    print('fl',forder_list)
+    return uploadFileList, linkMap
+
+
+def file_uplode(sf, uploadFileList,linkMap):
+    print('=== file upload ===')
+    sessionId = sf.session_id
+    cvidList =[]
+    ContentVersion ={}
+    # count = 0
+    # os.path.basename(upladFile.get('PathOnClient'))
+    folderName = '0521_업종_parts_일러스트'
+    path_dir = '/Users/deokjunekim/Downloads/' + folderName
+
+    for upladFile in uploadFileList:
+        entity = upladFile
+        print(entity)
+        files = {
+            'entity_content': (None, json.dumps(entity), 'application/json'),
+            'VersionData': (os.path.basename(path_dir + '/' + upladFile.get('PathOnClient')),
+                            open(path_dir + '/' +upladFile.get('PathOnClient'), 'rb'), 'application/octet-stream')
+        }
+        response = requests.post('https://lgchem1--test.my.salesforce.com/services/data/v51.0/sobjects/ContentVersion',
+                                 headers={'Authorization': 'Bearer %s' % sessionId},
+                                 files=files
+                                 )
+        ContentVersion[response.json().get('id')] = linkMap.get(entity["Title"])
+
+        cvidList.append(response.json().get('id'))
+
+    uploade(sf, cvidList, ContentVersion)
+
+def search_documentLink(linkMap):
+    linkList = list(linkMap.values())
+    sf = salesforceCon()
+    cdIdList = []
+    response_cv = sf.query(
+        format_soql("SELECT Id, LinkedEntityId, ContentDocumentId FROM ContentDocumentLink where LinkedEntityId IN {idList}", idList=linkList))
+
+    for record in response_cv["records"]:
+        cdIdList.append(record["ContentDocumentId"])
+
+    response_cd = sf.query(
+        format_soql("SELECT Id, Title from ContentDocument WHERE Id IN {idList}", idList=cdIdList))
+
+    delIdList = []
+    tMap = {}
+    for record in response_cd["records"]:
+        if linkMap.get(record["Title"]) != None:
+            print(linkMap.get(record["Title"]), record["Title"])
+            delIdList.append({'Id':record["Id"]})
+        elif linkMap.get(record["Title"].split('.')[0]) != None:
+            print(linkMap.get(record["Title"].split('.')[0]), record["Title"])
+            delIdList.append({'Id':record["Id"]})
+        # elif record["Title"].split('_')[-1] == 'Active' or record["Title"].split('_')[-1] == 'AppEmpty':
+        #     print(record["Title"])
+        # elif record["Title"].find('Btn') != -1 and record["Title"].find('Active') == -1:
+        #     print(record["Title"].split('_')[6])
+        #     tMap[record["Title"].split('_')[6]] = record["Id"]
+            # print(record["Title"], record["Id"])
+
+    # for i in tMap.keys():
+    #     print(tMap.get(i))
+    # print(delIdList)
+    # print(len(delIdList), len(linkMap.keys()))
+    # print(linkMap)
+    # sf.bulk.ContentDocument.delete(delIdList, batch_size=100, use_serial=True)
+
+
+
+# Salesforce Session 가져오기
+sf = salesforceCon()
+
+# Salesforce Application 구조 가져오기
+industry = getHierarchy(sf)
+
+# 다운로드 받은 파일 id 매핑
+uploadFileList, linkMRap = searchDirectory(industry)
+
+# 업로드 진행할 파일이 존재 시 파일 삭제
+search_documentLink(linkMRap)
+
+# ContentVersion 파일 업로드
+# file_uplode(sf, uploadFileList, linkMRap)
+
+
+
+"""
+    Application 2-Dept
+    Industry - Application
+    SELECT Industry__c FROM Application__c Group by Name
+"""
+
+"""
+    Part 3-Dept
+    Industry - Application - Part
+    
+"""
+
+
+0691s000000kQYzAAM Security Alarm_01_Active
+0691s000000kQbZAAU PCB_01_Active
+0691s000000kQSmAAM Garage Door_01_AppEmpty
+0691s000000kQc4AAE Semiconductor_02_Active
+0691s000000kPvxAAE INDUSTRIES_Various Industries_Industrial_bobbin_AppEmpty
+0691s000000kQUxAAM Roof Tile_01_AppEmpty
+0691s000000kcQiAAI Cockpit_04_Active
+0691s000000kQcOAAU Semiconductor_01_Active
+0691s000000kQSNAA2 Canopy_01_AppEmpty
+0691s000000kQYlAAM Multi Tap_01_Active
+0691s000000kQQxAAM Fence_01_AppEmpty
+0691s000000kQT6AAM Irrigation Part_01_AppEmpty
+0691s000000kQTzAAM Road Marker_01_AppEmpty
+0691s000000kcPvAAI DoorTrim_06_Active
+0691s000000kQPOAA2 Bathtub_01_AppEmpty
+0691s000000kcQBAAY DoorTrim_05_Active
+0691s000000kPw7AAE Various_Beauty_Artificial-Nail_AppEmpty
+0691s000000kQVRAA2 Traffic Barrier_01_AppEmpty
+0691s000000kcPwAAI Cockpit_05_Active
+0691s000000kcQnAAI InteriorETC_01_Active
+0691s000000kQWUAA2 Terminal Box _01_Active
+0691s000000kcQ9AAI DoorTrim_01_Active
+0691s000000kQTpAAM Rain Gutter_01_AppEmpty
+0691s000000kQacAAE Consent_01_Active
+0691s000000kQUJAA2 Roller Shutter_01_AppEmpty
+0691s000000kQVSAA2 Telephone_01_Active
+0691s000000kQSUAA2 Ventilation_01_AppEmpty
+0691s000000kQcDAAU Switch_01_Active
+0691s000000kQQHAA2 Deco Sheet_01_AppEmpty
+0691s000000kQVlAAM Antenna_01_Active
+0691s000000kcP1AAI INDUSTRIES_Automotive_Exterior_Bumper_Bumper Grille_Btn_51_Active
+0691s000000kcPRAAY DoorTrim_03_Active
+0691s000000kQW0AAM Interphone_01_Active
+0691s000000kQQWAA2 Door_01_AppEmpty
+0691s000000kQLbAAM INDUSTRIES_Various Industries_Beauty_Hair Scalp Care Helmet machine_Housing_Active
+0691s000000kQTaAAM Vacuum Cleaner_03_Active
+0691s000000kQKeAAM Artificial Nail_01_AppEmpty
+0691s000000kcQOAAY DoorTrim_07_Active
+0691s000000kQZEAA2 Delivery Robot_01_Active
+0691s000000kQZJAA2 Food Serving Robot_01_Active
+0691s000000kQQvAAM Handrail_01_AppEmpty
+0691s000000kQWtAAM Wireless Router_01_Active
+0691s000000kcQYAAY Cockpit_02_Active
+0691s000000kQZdAAM MFP_03_Active
+0691s000000kQbeAAE Power Tool_01_Active
+0691s000000kQQlAAM Edge Band_01_AppEmpty
+0691s000000kcP2AAI Cockpit_03_Active
+0691s000000kQLCAA2 Tractor_02_Active
+0691s000000kcPMAAY DoorTrim_02_Active
+0691s000000kQZKAA2 MFP_02_Active
+0691s000000kQLMAA2 Tractor_03_Active
+0691s000000kcR2AAI InteriorETC_03_Active
+0691s000000kcPxAAI Cockpit_06_Active
+0691s000000kQYkAAM Fire Alarm_01_Active
+0691s000000kQVHAA2 Signboard_01_AppEmpty
+0691s000000kQJGAA2 INDUSTRY_Various Industries_Toy block_AppEmpty
+0691s000000kQZ9AAM Security Camera_01_Active
+0691s000000kPw2AAE Various_Industrial_Safety-Helmet_AppEmpty
+0691s000000kQSSAA2 Decking_01_AppEmpty
+0691s000000kQTBAA2 Pipe_01_AppEmpty
+0691s000000kQZOAA2 MFP_01_Active
+0691s000000kcQTAAY Cockpit_01_Active
+0691s000000kcQxAAI InteriorETC_02_Active
+0691s000000kcQAAAY DoorTrim_04_Active
+0691s000000kPvnAAE Various_Leisure_Helmet_AppEmpty

@@ -1,0 +1,6 @@
+simple-salesforce
+Flask
+gunicorn
+requests
+PyPDF2
+flask-restx

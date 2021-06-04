@@ -139,16 +139,16 @@ def file_merge2(records, uuid, gradeId):
 
 sf = salesforceCon()
 
-records = {"records":[{
-    "ContentDocumentId":"0681s000000bGqTAAU",
-    "VersionData":"/services/data/v51.0/sobjects/ContentVersion/0681s000000bGqTAAU/VersionData"
-},
-    {
-    "ContentDocumentId":"0681s000000bGrHAAU",
-    "VersionData":"/services/data/v51.0/sobjects/ContentVersion/0681s000000bGrHAAU/VersionData"
-}]}
-
-files(sf, records)
+# records = {"records":[{
+#     "ContentDocumentId":"0681s000000bGqTAAU",
+#     "VersionData":"/services/data/v51.0/sobjects/ContentVersion/0681s000000bGqTAAU/VersionData"
+# },
+#     {
+#     "ContentDocumentId":"0681s000000bGrHAAU",
+#     "VersionData":"/services/data/v51.0/sobjects/ContentVersion/0681s000000bGrHAAU/VersionData"
+# }]}
+#
+# files(sf, records)
 # method = 'upload'
 # 
 # sf = salesforceCon()
