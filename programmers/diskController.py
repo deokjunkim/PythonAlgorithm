@@ -45,10 +45,49 @@ jobs	return
 2ms 시점에 6ms 걸리는 작업 요청이 들어옵니다.
 """
 
+import heapq
 
+from collections import deque
 
 def solution(jobs):
-    answer = 0
-    return answer
+    tasks = deque(sorted([(x[1], x[0]) for x in jobs], key=lambda x: (x[1], x[0])))
+    print(tasks)
+    q = []
+    heapq.heappush(q, tasks.popleft())
+    print(q)
+    current_time, total_response_time = 0, 0
+    while len(q) > 0:
+        dur, arr = heapq.heappop(q)
+        print(dur, arr, max(current_time + dur, arr + dur), current_time + dur)
+        current_time = max(current_time + dur, arr + dur)
 
-solution([[0, 3], [1, 9], [2, 6]])
+        total_response_time += current_time - arr
+        while len(tasks) > 0 and tasks[0][1] <= current_time:
+            heapq.heappush(q, tasks.popleft())
+        if len(tasks) > 0 and len(q) == 0:
+            heapq.heappush(q, tasks.popleft())
+
+    print(tasks)
+    answer = 0
+    heap = []
+
+    now = 0
+    count = 0
+    start = -1
+    while count < len(jobs):
+        for job in jobs:
+            if start < job[0] <= now:
+                heapq.heappush(heap, [job[1], job[0]])
+        if len(heap) > 0:
+            item = heapq.heappop(heap)
+            start = now
+            now += item[0]
+            answer += now - item[1]
+            count += 1
+
+        else:
+            now +=1
+
+    return int(answer/len(jobs))
+
+print(solution([[0, 3], [1, 9], [2, 6]]))

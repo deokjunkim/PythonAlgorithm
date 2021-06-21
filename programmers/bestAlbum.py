@@ -31,25 +31,64 @@ pop 장르는 3,100회 재생되었으며, pop 노래는 다음과 같습니다.
 
 ※ 공지 - 2019년 2월 28일 테스트케이스가 추가되었습니다.
 """
+# from collections import defaultdict
+#
+# def solution(genres, plays):
+#
+#     play_count_by_genre = defaultdict(int)
+#     songs_in_genre = defaultdict(list)
+#
+#     for song_id, genre, play in zip(range(len(genres)), genres, plays):
+#         print(song_id, genre, play)
+#         play_count_by_genre[genre] += play
+#         songs_in_genre[genre].append((-play, song_id))
+#
+#     genre_in_order = sorted(play_count_by_genre.keys(), key=lambda g: play_count_by_genre[g], reverse=True)
+#
+#     print(sorted(songs_in_genre.keys(), key= lambda h: songs_in_genre[h], reverse=True ))
+#     answer = list()
+#     for genre in genre_in_order:
+#         print(genre)
+#         answer.extend([song_id for minus_play, song_id in sorted(songs_in_genre[genre])[:2]])
+#
+#     return answer
+#
+# def counter():
+#
+#     i = 0
+#     while True:
+#         yield i
+#         i += 1
+
+from collections import defaultdict
+
 def solution(genres, plays):
     answer = []
-    albumPlyaDic = {}
-    albumdic = {}
-    albumList = []
-    for i in range(len(genres)):
-        gnere = genres[i]
-        play = plays[i]
-        if albumPlyaDic.get(gnere) != None:
-            albumPlyaDic[gnere] += play
-            albumdic[gnere] = []
+    plays_by_genres = {}
+    detail_plays_by_genres = {}
+    for idx, genre, play in zip(range(len(genres)), genres, plays):
+        if genre in plays_by_genres.keys():
+            plays_by_genres[genre] += (play * -1)
+            detail_plays_by_genres[genre].append((-play, idx))
         else:
-            albumPlyaDic[gnere] = play
-            albumdic[gnere] = [i]
-    print(albumPlyaDic)
+            plays_by_genres[genre] = (play * -1)
+            detail_plays_by_genres[genre] = [(-play, idx)]
+
+    plays_by_genres = sorted(plays_by_genres.keys(), key= lambda k : plays_by_genres[k])
+
+    for gen in plays_by_genres:
+        answer.extend([value for key, value in sorted(detail_plays_by_genres[gen])[:2]])
+
     return answer
 
+
+
+"""
+1. 전체 재생횟수가 큰 순서 대로 알고 있어 한다
+2.
+
+"""
 genres =["classic", "pop", "classic", "classic", "pop"]
 plays = [500, 600, 150, 800, 2500]
 solution(genres,plays)
 
-print(((51030*0.5)+(50300*0.5))/1)

@@ -28,54 +28,33 @@ priorities	location	return
 
 6개의 문서(A, B, C, D, E, F)가 인쇄 대기목록에 있고 중요도가 1 1 9 1 1 1 이므로 C D E F A B 순으로 인쇄합니다.
 """
+from collections import deque
+
 def solution(priorities, location):
-    listP = []
-    count = 0
-    print(priorities)
-    while len(priorities) > count:
-        check = False
-        cp = priorities[0]
-        for p in priorities:
-            if p > cp:
-                check = True
+  answer = 0
 
-        if check:
-            priorities.append(priorities.pop(0))
+  d = deque([(v,i) for i,v in enumerate(priorities)])
+  print(d)
+  print(d,len(d),max(d))
 
-        count += 1
+  while len(d):
+      item = d.popleft()
+      if d and max(d)[0] > item[0]:
+          d.append(item)
+      else:
+          answer += 1
+          if item[1] == location:
+              break
+  return answer
 
-    print(priorities)
+# for a in range(10,-1,-1):
+#     print(a)
+a =[1,2,3,4]
 
-
-
-    temporary = []
-    # print(len(priorities))
-    # print(range(len(priorities)))
-    # print(list(range(len(priorities))))
-    # pl = list(range(len(priorities)))
-    # print(pl)
-    # print( dict(zip(list(range(len(priorities)))),  priorities))
-    # zip()
-    # for p in priorities:
-    #     print(p)
-    #     print('stack', stack)
-    #     if stack == []:
-    #         stack.append(p)
-    #     elif stack[-1] > p:
-    #         while True:
-    #             temporary.append(stack.pop())
-    #             stack.append(p)
-    #             break
-    #     else:
-    #         stack.append()
-
-
-        # print(stack)
-
-
-
+print(type(zip([1,2,3],[4,5,6])))
+print(a[1:])
 print(solution([2, 1, 3, 2], 2))
 print()
 print(solution([1, 1, 9, 1, 1, 1], 5))
-print()
-print(solution([2, 2, 2, 1, 3, 4], 3))
+# print()
+# print(solution([2, 2, 2, 1, 3, 4], 3))

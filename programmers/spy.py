@@ -38,97 +38,31 @@ face에 해당하는 의상이 crow_mask, blue_sunglasses, smoky_makeup이므로
 2. blue_sunglasses
 3. smoky_makeup
 """
-import itertools
+
+from collections import Counter
 from functools import reduce
+
 def solution(clothes):
-    answer = 0
-    answer += len(clothes)
-    clothesDic ={}
-
-    for clothe in clothes:
-        clothesDic.get(clothe[1])
-        if(clothesDic.get(clothe[1]) != None):
-            clothesDic[clothe[1]] += 1;
+    answer = 1
+    d = {}
+    for key, val in clothes:
+        if val in d.keys():
+            d[val] += 1
         else:
-            clothesDic[clothe[1]] = 1;
-        # print(clothe[0], clothe[1],clothesDic)
-    clothesList = list(clothesDic.values())
-    for i in range(2,len(clothesList)+1):
-        for com in list(itertools.combinations(clothesList,i)):
-            print(com)
-            print('answer1 : ' + str(answer))
-            answer += reduce(lambda x, y: x*y, com)
-            print('answer2 : ' + str(answer))
-    count = 0
-    print(clothesDic)
-    print(clothesDic.values())
-    print(answer)
-    # print(len(clothesDic))
-    # if len(clothesDic.keys()) != 1:
-    #     count = 1
-    # for i in range(len(clothesDic)):
-    #     if i == 0:
-    #         continue
-    #     for y in
 
-def wearSize(wearko):
-    a = [3,3,3]
-    sizeCount = 1
+            d[val] = 1
 
-    print(len(a))
-    answer = 0
-    count = 0
-    for i in range(2,len(a)+1):
-        for com in list(itertools.combinations(a,i)):
-            answer += reduce(lambda x, y: x*y, com)
-    print(answer)
+    for val in d.values():
 
+        answer *= (val+1)
 
-    # while(True):
-    #
-    #     for b in a:
-    #         if len(a)
-    #         count
-    #         print(b)
+    return answer -1
 
+def solution2(clothes):
+    print(reduce(lambda x,y :x+y [1,2,3,4,5]))
 
-    print(help(reduce))
-# result = list(itertools.combinations(["1","2","3","4"],2))
-# wearko =[]
-# wearSize(wearko)
-
-0,1,2
-0,1
-0,2
-1,2
-
-0,1,2
-
-
-    # for
-
-# 1
-# 9
-# 2
-# 3*3 9
-# 3*3 9
-# 3*3
-# 3
-# 3*3*3 27
-#
-# 3 2 1
-#
-# 1
-# 6
-# 2
-# 3*2
-# 3*1
-# 2*1
-
-3
-# 3*2*1
-#
-solution([["yellowhat", "headgear"], ["bluesunglasses", "eyewear"], ["bluesunglasses", "eyewear"], ["bluesunglasses", "eyewear"], ["green_turban", "headgear"],["yellowhat", "headgear"],["crow_mask", "face"], ["blue_sunglasses", "face"], ["smoky_makeup", "face"]])
+solution([["yellowhat", "headgear"], ["bluesunglasses", "eyewear"], ["green_turban", "headgear"]])
+solution([["crowmask", "face"], ["bluesunglasses", "face"], ["smoky_makeup", "face"]])
 # solution([["crow_mask", "face"], ["blue_sunglasses", "face"], ["smoky_makeup", "face"]])
 
 # print(((52600 * 1.5) + (52300 * 0.25) + (52000 * 0.25)) /2)

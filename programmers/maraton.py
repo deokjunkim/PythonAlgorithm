@@ -67,4 +67,4 @@ def solution3(participant, completion):
                 return c
     return None
 
-solution3(["mislav", "stanko", "mislav"], ["mislav", "stanko"])
+solution(["mislav", "stanko", "mislav"], ["mislav", "stanko"])
