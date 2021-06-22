@@ -4,9 +4,10 @@ def solution(numbers):
     a = []
     for n in numbers:
         a.append(n)
-
+    print(a)
     s = set()
     for i in range(len(a),0,-1):
+        print(i)
         for y in list(permutations(a,i)):
             c =''
             for j in y:
@@ -20,11 +21,17 @@ def solution(numbers):
             if i == y+1:
                 answer +=1
 
+        if i == 2 :
+            answer += 1
+
     return answer
 
 print(solution("17"))
 print(solution("011"))
 
+# for y in range(2,3,1):
+#     print(y)
+# 에라토스테네스
 
 def prime_list(n):
     # 에라토스테네스의 체 초기화: n개 요소에 True 설정(소수로 간주)
