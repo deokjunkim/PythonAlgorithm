@@ -1,23 +1,29 @@
 def solution(name):
-    answer = 0
+
+    change = [ord(n) - ord('A') if ord(n) <= ord('N') else ord('Z') - ord(n) + 1 for n in name]
+
     idx = 0
-    Acount = 0
-    bidx = 0
-    for i in range(len(name)):
-        if name[i] == 'A':
-            for y in range(i,len(name)):
-                if name[y] == 'A':
-                    Acount += 1
-                else:
-                    break
-    # left
-    if Acount > len(name) - bidx:
+    answer = 0
+    print(change)
+    while True:
+        answer += change[idx]
+        change[idx] = 0
+        if sum(change) == 0:
+            return answer
 
-    else:
+        left, right = 1, 1
+
+        while change[idx - left] == 0:
+            left += 1
+
+        while change[idx + right] == 0:
+            right += 1
+
+        answer += left if left < right else right
+        idx += -left if left < right else right
 
 
-
-    return answer
+    return  answer
 
 
 
@@ -25,8 +31,11 @@ def solution(name):
 
 # print('A')-int('B'))
 # print(ord('A') - ord('Z'))
-# solution("JEROEN")
+solution("JEROEN")
 # solution("JAN")
-print(ord('Z') - ord('N'))
-print(chr(ord('Z') - ord('N') + 1))
-print(ord('N') - ord('A'))
+# print(ord('Z') - ord('N'))
+# print(chr(ord('Z') - ord('N') + 1))
+# print(ord('N') - ord('A'))
+# print(ord('A'), ord('Z'), ord('N'))
+# a = dict('a','b')
+# print(a)
