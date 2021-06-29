@@ -18,14 +18,6 @@ def solution(number, k):
 
 
 
-
-
-# solution("1924",2)
-# print()
-# solution("1231234",3)
-# print()
-# solution("4177252841",4)
-
 # k = 2
 a = [1,9,2,4]
 print(a[:-1])
@@ -42,5 +34,5 @@ print(b2[:0])
 # -( len - ( len - k +1 ))
 -(1-1)
 
-if( k == 0) 일때를 확인ㅛㅅ '해서 조건문 작성
+# if( k == 0) 일때를 확인ㅛㅅ '해서 조건문 작성
 
