@@ -11,11 +11,12 @@ def solution(people, limit):
             i += 1
         j -= 1
 
+
     return cnt
 
 # solution([70, 50, 80, 50], 100)
-# solution([70, 80, 50], 100)
-print(solution([50, 40, 50, 60], 100))
+solution([70, 80, 50], 100)
+# print(solution([50, 40, 50, 60], 100))
 
 # a = [1,2,3]
 # print(a[0:])
